@@ -19,7 +19,6 @@ namespace Stem
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            SetEnvironmentVariables();
         }
 
         public IConfiguration Configuration { get; }
@@ -53,15 +52,6 @@ namespace Stem
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
-        }
-
-        private void SetEnvironmentVariables()
-        {
-            string[] variableNames = {"DB_NAME", "DB_MASTER_USER", "DB_MASTER_PASSWORD", "DB_HOST","DB_PORT"};
-            foreach (var variable in variableNames)
-            {
-                Environment.SetEnvironmentVariable(variable, Configuration[$"EnvironmentVariables:{variable}"]);
-            }
         }
     }
 }

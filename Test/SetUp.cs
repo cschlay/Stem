@@ -12,13 +12,6 @@ namespace Test
         [AssemblyInitialize]
         public static void SetUp(TestContext context)
         {
-            Environment.SetEnvironmentVariable("DB_NAME", "main");
-            Environment.SetEnvironmentVariable("DB_HOST", "127.0.0.1");
-            Environment.SetEnvironmentVariable("DB_PORT", "5433");
-            Environment.SetEnvironmentVariable("DB_MASTER_USER", "postgres");
-            Environment.SetEnvironmentVariable("DB_MASTER_PASSWORD", "postgres");
-
-            // Create test database.
             using var sqlSession = new SqlSession();
             new NpgsqlCommand("DROP DATABASE IF EXISTS test", sqlSession.Connection).ExecuteNonQuery();
             new NpgsqlCommand("CREATE DATABASE test", sqlSession.Connection).ExecuteNonQuery();
@@ -26,9 +19,13 @@ namespace Test
             Environment.SetEnvironmentVariable("DB_NAME", "test");
         }
         
+        /** Before any test can be run we need to apply migrations. */
         [TestMethod]
-        public void EnsureSetUpOk()
+        public void Migrate()
         {
+            var migrations = new MigrationManager();
+            migrations.ensureMigrationTableExists();
+            migrations.apply();
         }
     }
 }

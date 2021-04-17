@@ -5,4 +5,14 @@
     &lt;TestId&gt;MSTest::945B1211-B253-4164-9EBB-B388040CEA40::net5.0::Test.Setup&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;MSTest::945B1211-B253-4164-9EBB-B388040CEA40::net5.0::Test.SqlClientTest&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=341fb9ce_002Dbf49_002D4d92_002Dab4d_002Db6fe9dff1a95/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Setup #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;MSTest::945B1211-B253-4164-9EBB-B388040CEA40::net5.0::Test.Setup&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=f97b56d8_002D69b9_002D4a9d_002D9d30_002Dd521eb0a1ab1/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Setup" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;MSTest::945B1211-B253-4164-9EBB-B388040CEA40::net5.0::Test.Setup&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
