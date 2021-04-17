@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Npgsql;
 using Stem.Databases;
@@ -24,8 +23,7 @@ namespace Test
         public void Migrate()
         {
             var migrations = new MigrationManager();
-            migrations.ensureMigrationTableExists();
-            migrations.apply();
+            migrations.ApplyAll();
         }
     }
 }
