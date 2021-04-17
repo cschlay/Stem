@@ -15,7 +15,19 @@ namespace Stem
         public const string DbPort = "5433";
         public const string DbMasterUser = "postgres";
         public const string DbMasterPassword = "postgres";
+        public const string DbUserPasswordPrefix = "prefix"
         public const string MigrationFolder = "C:\\Projects\\Stem\\Migrations123";
     }
 }
 ```
+
+## Database Credentials
+
+Users access database as restricted role. They have following credentials:
+
+```
+role: pid
+password: DbUserPasswordPrefix + random_uuid
+```
+
+This way credentials are half-baked into the database.

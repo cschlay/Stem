@@ -4,6 +4,7 @@ using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Npgsql;
 using Stem.Databases;
+using Stem.Models;
 
 namespace Test
 {
@@ -23,13 +24,18 @@ namespace Test
             using var session = new SqlSession();
             var command = new NpgsqlCommand("CREATE TABLE test_sqlclient (id SERIAL PRIMARY KEY , name VARCHAR(50) NOT NULL)", session.Connection);
             command.ExecuteNonQuery();
+            
+            // A test user
+            NpgsqlDataReader reader = new NpgsqlCommand("INSERT INTO account (email) VALUES ('test@laych.dev') RETURNING pid", session.Connection).ExecuteReader();
+            reader.Read();
+            Trace.WriteLine(reader.GetGuid(0).ToString());
         }
 
         [TestMethod]
         public void InsertRow()
         {
             using var sqlClient = new SqlClient();
-            int id = sqlClient.Insert("test_sqlclient", new string[]{"name"}, new string[]{"Lilac"});
+            int id = sqlClient.Insert("test_sqlclient", new Dictionary<string, dynamic>{{"name", "Lilac"}});
             sqlClient.Commit();
             TestModel result = sqlClient.FindById<TestModel>("test_sqlclient", new string[]{"name"}, id);
             Assert.IsNotNull(result);

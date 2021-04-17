@@ -1,4 +1,7 @@
-﻿public class BaseModel
+﻿namespace Stem.Models
 {
-    public BaseModel() {}
+    public class BaseModel
+    {
+        public BaseModel() {}
+    }
 }

@@ -1,23 +1,26 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using Npgsql;
-using NpgsqlTypes;
+using Stem.Models;
 
 namespace Stem.Databases
 {
     public class SqlClient : IDisposable
     {
         private readonly SqlSession _sqlSession;
-        private readonly NpgsqlTransaction _transaction;
+        private readonly NpgsqlTransaction? _transaction;
         
-        public SqlClient()
+        public SqlClient(bool autoCommit = false)
         {
             _sqlSession = new SqlSession();
-            _transaction = _sqlSession.Connection.BeginTransaction();
+
+            if (!autoCommit)
+            {
+                _transaction = _sqlSession.Connection.BeginTransaction();
+            }
         }
 
         /**
@@ -34,7 +37,7 @@ namespace Stem.Databases
             using NpgsqlDataReader reader = command.ExecuteReader();
             if (reader.Read())
             {
-                var model = castToModel<TModel>(reader, queryColumns);
+                var model = CastToModel<TModel>(reader, queryColumns);
                 if (reader.Read())
                 {
                     throw new MultipleRowsFoundException($"Table '{table}' has multiple rows with id of '{id}'.");
@@ -46,38 +49,42 @@ namespace Stem.Databases
         
         
         /**
-         * Adds new row to database. Keep the statement safe, it will throw errors if it contains unsafe contents.
+         * Adds new row to database.
          * It is possible to only execute one SQL command, using ";" will not work.
+         *
+         * WARNING: Never let user set the column name! Always explicitly pass it.
          */
-        public int Insert(string table, string[] columns, string[] parameters)
+        public int Insert(string table, Dictionary<string, dynamic> columns)
         {
-            string columnString = string.Join(", ", columns);
-            string parameterString = string.Join(", ", columns.Select((x, i) => $"@p{i.ToString()}"));
+            string columnString = string.Join(", ", columns.Keys);
+            string parameterString = string.Join(", ", columns.Select((x) => $"@{x.Key}"));
             string statement = $"INSERT INTO {table} ({columnString}) VALUES ({parameterString}) RETURNING id";
-            var command = new NpgsqlCommand(statement, _sqlSession.Connection, _transaction);
-            int i = 0;
-            foreach (var parameter in parameters)
+            if (IsSqlSafe(statement))
             {
-                command.Parameters.AddWithValue($"p{i.ToString()}", parameter);
-                i++;
+                var command = new NpgsqlCommand(statement, _sqlSession.Connection);
+                foreach (KeyValuePair<string, dynamic> column in columns)
+                {
+                    command.Parameters.AddWithValue(column.Key, column.Value);
+                }
+
+                var result = command.ExecuteScalar();
+                if (result != null)
+                {
+                    return (int) result;
+                }
             }
-            var x = command.ExecuteScalar();
-            if (x != null)
-            {
-                return (int) x;
-            }
-            _transaction.Rollback();
+            _transaction?.Rollback();
             throw new InsertFailedException("Failed to insert row.");
         }
 
         public void Commit()
         {
-            _transaction.Commit();
+            _transaction?.Commit();
         }
 
         public void Rollback()
         {
-            _transaction.Rollback();
+            _transaction?.Rollback();
         }
  
         public void Dispose()
@@ -85,7 +92,7 @@ namespace Stem.Databases
             _sqlSession.Dispose();
         }
 
-        private TModel castToModel<TModel>(NpgsqlDataReader row, IEnumerable<string> columns) where TModel : BaseModel, new()
+        private TModel CastToModel<TModel>(NpgsqlDataReader row, IEnumerable<string> columns) where TModel : BaseModel, new()
         {
             var model = new TModel();
             var properties = model.GetType();
@@ -103,15 +110,13 @@ namespace Stem.Databases
             return model;
         }
         
-        private bool isSqlSafe(string statement)
+        private bool IsSqlSafe(string statement)
         {
-            // Prevents constructing string 
             if (statement.Contains("\"") || statement.Contains("'") || statement.Contains(";"))
             {
-                //_transaction.Rollback();
-                throw new UnsafeSqlException($"Unsafe sql statement: {statement}!");
+                _transaction?.Rollback();
+                return false;
             }
-
             return true;
         }
     }
@@ -126,13 +131,6 @@ namespace Stem.Databases
     public class InsertFailedException : Exception
     {
         public InsertFailedException(string msg) : base(msg)
-        {
-            
-        }
-    }
-    public class UnsafeSqlException : Exception
-    {
-        public UnsafeSqlException(string msg) : base(msg)
         {
             
         }
